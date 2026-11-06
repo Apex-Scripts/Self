@@ -1,0 +1,58 @@
+import discord
+
+# ================== CONFIG ==================
+TOKEN = ""
+
+# Pair 1
+SOURCE_1 = 1559698007900029002
+TARGET_1 = 1567961335298392154
+
+# Pair 2
+SOURCE_2 = 1559698008202027082
+TARGET_2 = 1567961378134823064
+# ============================================
+
+client = discord.Client()
+
+@client.event
+async def on_ready():
+    print(f"Logged in as {client.user} (ID: {client.user.id})")
+    print("Self-bot is running...")
+    print("-" * 50)
+
+@client.event
+async def on_message(message):
+    if message.author.id == client.user.id:
+        return
+
+    target = None
+    if message.channel.id == SOURCE_1:
+        target = client.get_channel(TARGET_1)
+    elif message.channel.id == SOURCE_2:
+        target = client.get_channel(TARGET_2)
+
+    if target is None:
+        return
+
+    files = []
+    for att in message.attachments:
+        try:
+            files.append(await att.to_file())
+        except:
+            pass
+
+    try:
+        await target.send(
+            content=message.content or None,
+            files=files if files else None
+        )
+        print(f"Forwarded → {target.id}")
+    except Exception as e:
+        print(f"Error: {e}")
+
+try:
+    client.run(TOKEN)
+except discord.errors.LoginFailure:
+    print("\nTOKEN IS INVALID OR EXPIRED!")
+except Exception as e:
+    print(f"Unexpected error: {e}")
